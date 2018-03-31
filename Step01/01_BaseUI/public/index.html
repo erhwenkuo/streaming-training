@@ -1,0 +1,92 @@
+<!doctype html>
+<html ng-app="myApp">
+    <head>
+        <title>01_BaseUI</title>
+        <link rel="stylesheet" href="assets/css/sketch/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+        <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
+    </head>
+    <body ng-controller="myCtrl">
+        <br/>
+        <div class="container">                
+            <!-- 即時展現由Server告知的線上連線數 -->
+            <button type="button" class="btn btn-primary">
+                <i class="fas fa-users"></i> Online <span class="badge badge-pill badge-success"><span ng-bind="onelineCounter"/></span>
+            </button>
+
+            <button type="button" class="btn btn-primary">
+                <i class="far fa-clock"></i> ServerClock <span class="badge badge-danger"><span ng-bind="serverClock | date: 'yyyy-MM-dd HH:mm:ss Z'"/></span>
+            </button>
+        </div>
+        <div class="container">
+            <div class="row">
+                <!-- Client往Server的訊息  -->
+                <div class="col" id="clientToServer">
+                    <form>
+                        <fieldset>
+                            <legend>Client to Server</legend>                    
+                            <div class="form-group">
+                                <label for="exampleTextarea">Message to publish</label>
+                                <textarea class="form-control" id="msgClientToServer" rows="10"></textarea>
+                            </div>                    
+                            <button type="submit" class="btn btn-primary">Send to Server</button>
+                        </fieldset>
+                    </form>
+                </div>
+                
+                <!-- Server往Client的訊息  -->
+                <div class="col" id="serverToClient">
+                    <legend>Server to Client</legend> 
+                    <div class="form-group">
+                        <label for="exampleTextarea">Message received</label>
+                        <textarea class="form-control" id="msgServerToClient" rows="10"></textarea>
+                    </div>  
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            
+        </div>
+    
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="assets/js/jquery-3.3.1.min.js"></script>
+        <script src="assets/js/bootstrap.bundle.min.js"></script>
+        <script src="assets/js/angular.min.js"></script>
+        <script>
+            var app = angular.module('myApp', []);
+    
+            app.controller('myCtrl', function($scope) {
+                $scope.onelineCounter = 0;
+                $scope.serverClock = 0; //epoch
+
+                // 透過socket.io連接到server來建立雙向溝通的頻道
+                var socket = io();
+    
+                $('form').submit(function(){
+                    // 將訊息送給server
+                    socket.emit('c_msg', $('#msgClientToServer').val());
+                    $('#msgClientToServer').val('');
+                    return false;
+                });
+                
+                // 收到由server送來的訊息
+                socket.on('s_oneline_count', function(counter){
+                    $scope.onelineCounter = counter;
+                    $scope.$apply();
+                });
+
+                socket.on('s_msg', function(msg){
+                    $('#msgServerToClient').text(msg);
+                });
+
+                socket.on('s_server_clock', function(serverClock){
+                    $scope.serverClock = serverClock;
+                    $scope.$apply();
+                });
+    
+            });
+    
+        </script>  
+
+    </body>
+</html>
