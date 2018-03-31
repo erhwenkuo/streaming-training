@@ -17,4 +17,6 @@
 ## 啟動服務
 `node app.js`
 
+並使用瀏覽器連結至 `http://localhost:3000`，可以同時使用多個網頁來觀察"Online"的counter的即時變動。 
 
+![page_screen](https://github.com/erhwenkuo/streaming-training/blob/master/Step01/01_BaseUI/page_screen.png)
