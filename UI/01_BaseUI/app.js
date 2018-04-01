@@ -6,8 +6,15 @@ var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+var config = require('config'); // 使用"config"模組來控制組態與設定
+console.log(config.get('app.id'))
+
 // 產生一個上下文(context)物件
 var appContext = {};
+
+// 產生一個App的profile物件
+var appProfile = {};
+appProfile.id = config.get('app.id'); // 標註這是那一個App的instance id
 
 // *** 使用Express來提供client對server的Req/Res的管道 ***
 app.use(bodyParser.json());
@@ -37,10 +44,14 @@ function onConnect(socket){
     // 增加"現在連線數"
     appContext.onlineCounter++;
 
+    // 廣播"App的相關基本Profile"訊息
+    io.emit('s_app_profile', appProfile);
+
     // 廣播"現在連線數"訊息
     io.emit('s_oneline_count', appContext.onlineCounter);
     console.log('Online Counter:'+appContext.onlineCounter);
 
+    // 廣播由某一個client所送出來的訊息給所有連線的clients
     socket.on('c_msg', function(msg){
         console.log('message: ' + msg);
         // 廣播訊息給所有連接的socket clients
@@ -73,6 +84,6 @@ setInterval(function(){
 
 
 // 在特定的port number啟動服務
-http.listen(3000, function(){
-    console.log('listening on *:3000');
+http.listen(config.get('app.http.port'), function(){
+    console.log('listening on *:' + config.get('app.http.port'));
 });

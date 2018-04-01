@@ -8,15 +8,24 @@
     </head>
     <body ng-controller="myCtrl">
         <br/>
-        <div class="container">                
+        <div class="container">
+            <!-- 連接到的App的instance -->
+            <button type="button" class="btn btn-primary">
+                    <i class="fas fa-server"></i> AppID: <span class="badge badge-success"><span ng-bind="appProfile.id"/></span>
+            </button>                
             <!-- 即時展現由Server告知的線上連線數 -->
             <button type="button" class="btn btn-primary">
                 <i class="fas fa-users"></i> Online <span class="badge badge-pill badge-success"><span ng-bind="onelineCounter"/></span>
             </button>
-
+            <!-- 即時展現由Server告知的Server時間 -->
             <button type="button" class="btn btn-primary">
                 <i class="far fa-clock"></i> ServerClock <span class="badge badge-danger"><span ng-bind="serverClock | date: 'yyyy-MM-dd HH:mm:ss Z'"/></span>
             </button>
+            <!-- 展現與socket.io的連線狀態 -->
+            <div>
+                <span ng-show="socketConnected" style="color:green"><i class="far fa-check-circle" ></i> Connected</span>
+                <span ng-show="!socketConnected" style="color:red"><i class="fas fa-exclamation-triangle"></i></i> Not connect</span>
+            </div>
         </div>
         <div class="container">
             <div class="row">
@@ -56,8 +65,10 @@
             var app = angular.module('myApp', []);
     
             app.controller('myCtrl', function($scope) {
-                $scope.onelineCounter = 0;
-                $scope.serverClock = 0; //epoch
+                $scope.socketConnected = false; // 是否連接上socket.io的服務
+                $scope.appProfile = 'N/A';
+                $scope.onelineCounter = 'N/A';
+                $scope.serverClock = 'N/A'; //epoch
 
                 // 透過socket.io連接到server來建立雙向溝通的頻道
                 var socket = io();
@@ -68,19 +79,43 @@
                     $('#msgClientToServer').val('');
                     return false;
                 });
-                
-                // 收到由server送來的訊息
+
+                // 收到由server送來的app_profile訊息
+                socket.on('s_app_profile', function(appProfile){
+                    $scope.appProfile = appProfile;
+                    $scope.$apply();
+                });
+
+                // 收到由server送來的"現在連線數"訊息
                 socket.on('s_oneline_count', function(counter){
                     $scope.onelineCounter = counter;
                     $scope.$apply();
                 });
-
+                
+                // 收到由某一個client所送出來的訊息
                 socket.on('s_msg', function(msg){
                     $('#msgServerToClient').text(msg);
                 });
 
+                // 收到由server送來的"Server時間"訊息
                 socket.on('s_server_clock', function(serverClock){
                     $scope.serverClock = serverClock;
+                    $scope.$apply();
+                });
+
+                // 監聽socket.io的client的相關事件
+                socket.on('connect', function(){
+                    // 連線成功
+                    $scope.socketConnected = true;
+                    $scope.$apply();
+                });
+
+                socket.on('connect_error', function(error){
+                    // 連線失敗 - 重置相關的變數
+                    $scope.socketConnected = false;
+                    $scope.appProfile = 'N/A';
+                    $scope.onelineCounter = 'N/A';
+                    $scope.serverClock = 'N/A'; //epoch
                     $scope.$apply();
                 });
     
