@@ -23,8 +23,8 @@ docker run --name redis --port 6379:6379 -d redis
 
 ## 設定
 修改 `config/default-0.json`、 `config/default-1.json`、 `config/default-2.json` (三個instances的設定檔):
-- app.id (int) 代表一個application的instance編號, 例如: 0, 1, 2...
-- app.http.port (int) 代表要使用那一個http的port來提供服務, 例如: 3000, 3001, 3002...
+- app.id (int) 代表一個application的instance編號, 例如: 0, 1, 2...
+- app.http.port (int) 代表要使用那一個http的port來提供服務, 例如: 3000, 3001, 3002...
 - app.socket_io.scaled_with_redis (bool) 是否要使用Redis來scale out
 - redis.host (string) Redis服務的host
 - redis.port (int) Reids服務的port
@@ -50,16 +50,16 @@ docker run --name redis --port 6379:6379 -d redis
 ## 啟動單一instance的服務
 `node app.js`
 
-## 啟動多個instances的服務 (要先啟動Reids)
-- 使用`default-0.json`的設定
+## 啟動多個instances的服務 (要先啟動Redis)
+- 使用`default-0.json`的設定
   - `NODE_APP_INSTANCE=0 node app.js`
-- 使用`default-1.json`的設定
+- 使用`default-1.json`的設定
   - `NODE_APP_INSTANCE=1 node app.js`
-- 使用`default-2.json`的設定
+- 使用`default-2.json`的設定
   - `NODE_APP_INSTANCE=2 node app.js`
 
 ## 驗證
-使用瀏覽器連接到不同的app的host與port, 觀察UI上的"AppId"及"Online"人數。不同的AppId的Online人數是獨立被更新的。
+使用瀏覽器連接到不同的app的host與port, 觀察UI上的"AppId"及"Online"人數。不同的AppId的Online人數是獨立被更新的。
 但是發佈訊息時, 所有的瀏覽器都應該會收到相同的訊息。
 
 ![page_screen](https://github.com/erhwenkuo/streaming-training/blob/master/UI/02_ScaledUI/ui_screenshot.png)

@@ -22,8 +22,8 @@ BaseUI主要想用Socket.io的web-socket的溝通手法來讓後台可以在事�
 
 ## 設定
 修改 `config/default.json` :
-- app.id (int) 代表一個application的instance編號, 例如: 0,1,2...
-- app.http.port (int) 代表要使用那一個http的port來提供服務, 例如: 3000
+- app.id (int) 代表一個application的instance編號, 例如: 0,1,2...
+- app.http.port (int) 代表要使用那一個http的port來提供服務, 例如: 3000
 
 ```
 {
