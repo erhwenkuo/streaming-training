@@ -16,3 +16,11 @@ ScaledUI設計的目的就是展示如何擴展Socket.io的後台服務的專案
 
 ![02_architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/02_ScaledUI/architecture.png)
 
+### 03_ScaledUI 對後台的服務進行連線與負載的壓力測試
+
+scaledUI透過Redis的擴展讓我們擁有可以根據負載來scale-out後台的Socket.io的服務。隨之而來問題就是每一個App的instance可以支撐多少的連線與負載量呢?
+對於很多進入IT產業的工程師來說，能夠把使用者提出的功能需求順利完成就己經是氣喘噓噓了，壓力測試就上線後再慢慢調教吧!
+03_ScaledUI就想要對ScaledUI的後台服務進行連線與負載的壓力測試，讓我們在簡單快速開發之時，也能夠對上線後接踵而來的Scale-out與Throughtput進行思考與調教。
+
+![03_architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/03_ScaledUI/architecture.png)
+
