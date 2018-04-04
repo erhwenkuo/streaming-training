@@ -14,27 +14,27 @@
 2. Web REST Api的呼叫
 3. WebSocket(Socket.io)的連線與呼叫
 
-因此我們選擇了[artillery](https://artillery.io/)這個簡單且強大的工具。
+因此我們選擇了[artillery](https://artillery.io/)這個簡單且強大的工具。
 
 ![architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/03_ScaledUI/architecture.png)
 
 ## 安裝
 下載本專案後, 使用`npm install`來下載相關的Node.js的packages
 
-同時使用`npm install -g artillery`來安裝artillery。
+同時使用`npm install -g artillery`來安裝artillery。
 
 ## 安裝redis
 docker run --name redis --port 6379:6379 -d redis
 
 ## 設定
 修改 `config/default-0.json`、 `config/default-1.json`、 `config/default-2.json` (三個instances的設定檔):
-- app.id (int) 代表一個application的instance編號, 例如: 0, 1, 2...
-- app.http.port (int) 代表要使用那一個http的port來提供服務, 例如: 3000, 3001, 3002...
+- app.id (int) 代表一個application的instance編號, 例如: 0, 1, 2...
+- app.http.port (int) 代表要使用那一個http的port來提供服務, 例如: 3000, 3001, 3002...
 - app.socket_io.scaled_with_redis (bool) 是否要使用Redis來scale out
 - redis.host (string) Redis服務的host
 - redis.port (int) Reids服務的port
 
-## 測試單一instance的服務的socket穩定最大連線數的負載測試
+## 測試單一instance的服務的socket穩定最大連線數的負載測試
 啟動app.js的一個instance:
 `node app.js`
 
@@ -59,9 +59,9 @@ scenarios:
 
 結果:
 
-連線數衝到了7000多個的時候, 因為Node.js的GC pause過長，導致了新連線無法建立以及現有連線被斷開的現象。經過了多次的壓力測試後大約可以知道一個Node.js的instance(未經過其它的參數調整)在5000個sockets的同時連線下是可以穩定提供服務。
+連線數衝到了7000多個的時候, 因為Node.js的GC pause過長，導致了新連線無法建立以及現有連線被斷開的現象。經過了多次的壓力測試後大約可以知道一個Node.js的instance(未經過其它的參數調整)在5000個sockets的同時連線下是可以穩定提供服務。
 
-## 測試單一instance的服務在不同socket連線行為的負載測試
+## 測試單一instance的服務在不同socket連線行為的負載測試
 啟動app.js的一個instance:
 `node app.js`
 
@@ -114,30 +114,30 @@ scenarios:
       - think: 600 # 每秒執行1次持續600秒
 ```
 
-## 啟動多個instances的服務 (要先啟動Reids)最大連線數的負載測試
+## 啟動多個instances的服務 (要先啟動Reids)最大連線數的負載測試
 使用3個terminal分別啟動3個app.js的instances:
-- 使用`default-0.json`的設定
+- 使用`default-0.json`的設定
   - `NODE_APP_INSTANCE=0 node app.js`
-- 使用`default-1.json`的設定
+- 使用`default-1.json`的設定
   - `NODE_APP_INSTANCE=1 node app.js`
-- 使用`default-2.json`的設定
+- 使用`default-2.json`的設定
   - `NODE_APP_INSTANCE=2 node app.js`
 
 使用3個terminal分別啟動連線壓力測試:
 `artillery run socketio-conn-test-00.yaml`
-`artillery run socketio-conn-test-01.yaml`
+`artillery run socketio-conn-test-01.yaml`
 `artillery run socketio-conn-test-02.yaml`
 
-## 測試多個instances的服務在不同socket連線行為的負載測試
+## 測試多個instances的服務在不同socket連線行為的負載測試
 使用3個terminal分別啟動3個app.js的instances:
-- 使用`default-0.json`的設定
+- 使用`default-0.json`的設定
   - `NODE_APP_INSTANCE=0 node app.js`
-- 使用`default-1.json`的設定
+- 使用`default-1.json`的設定
   - `NODE_APP_INSTANCE=1 node app.js`
-- 使用`default-2.json`的設定
+- 使用`default-2.json`的設定
   - `NODE_APP_INSTANCE=2 node app.js`
 
 使用3個terminal分別啟動連線壓力測試:
 `artillery run socketio-load-test-00.yaml`
-`artillery run socketio-load-test-01.yaml`
+`artillery run socketio-load-test-01.yaml`
 `artillery run socketio-load-test-02.yaml`
