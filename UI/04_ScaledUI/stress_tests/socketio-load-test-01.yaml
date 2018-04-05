@@ -1,0 +1,42 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 1200  # 持續1200秒
+      arrivalRate: 10 # 每秒產生10個socket連線
+  variables:
+    greeting: ["hello", "goedemorgen", "добрый день", "guten tag", "bonjour", "hola"] # 固定的訊息
+  processor: "./functions.js" # 使用Javascript動態產生的訊息
+  socketio:
+    transports: ["websocket"]
+
+scenarios:
+  - name: "A user that just lurks" # 第一類的使用者，主要連上Server但沒有發什麼訊息
+    weight: 75 # 佔所有產生的使用者的75%
+    engine: "socketio"
+    flow:
+      - think: 600 # 每秒執行1次持續600秒
+
+  - name: "A mostly quiet user" # 第二類的使用者，偶而發些訊息
+    weight: 15 # 佔所有產生的使用者15%
+    engine: "socketio"
+    flow:
+      - emit:
+          channel: "c_msg"
+          data: "{{ greeting }}"
+      - think: 600 # 每秒執行1次持續600秒
+
+  - name: "A chatty user" # 第三類的使用者，很頻繁發訊息
+    weight: 10 # 佔所有產生的使用者10%
+    engine: "socketio"
+    flow:
+      - emit:
+          channel: "new message"
+          data: "{{ greeting }}"
+      - loop:
+          - function: "setMessage"
+          - emit:
+              channel: "c_msg"
+              data: "{{ message }}"
+          - think: 10 # 每秒執行1次持續10秒
+        count: 10 # 迭代10次
+      - think: 600 # 每秒執行1次持續600秒

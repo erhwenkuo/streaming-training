@@ -24,3 +24,9 @@ scaledUI透過Redis的擴展讓我們擁有可以根據負載來scale-out後台�
 
 ![03_architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/03_ScaledUI/architecture.png)
 
+### 04_ScaledUI 對後台的服務進行連線與負載的壓力測試
+
+了解每種服務的上限(天花板)對於提供穩定服務品質給使用者是重要的，及早了解自己服務的物理限制才能夠對症下藥進行改善。
+我們透過了Redis的幫助，讓我們有機會平行擴展web服務的instances來服務更多使用者連線。然而每一個新加入的web服務都可能是不同ip或port，對於使用者而言要求連線到不同的ip與port來存取服務是很不方便也不親民。本專案將在`03_ScaledUI`為基礎下進行專業結構的調整以及使用Nginx來配置reverse-proxy來解決問題。
+
+![04_architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/04_ScaledUI/architecture.png)
