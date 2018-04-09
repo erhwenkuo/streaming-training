@@ -40,5 +40,7 @@ ECharts是一款由百度前端技術部開發的，基於Javascript的數據可
 
 - 檢查每一個瀏覽器是不是同時會展現出相同的視覺化圖表
 
+![ui_demo](https://github.com/erhwenkuo/streaming-training/blob/master/UI/05_ChartedUI/ui_demo.png)
+
 ## 圖表範例
 在這個專案裡, 收集了百度Echart官網將近150個圖表範例。透過這個專案你將學到如何動態地對使用者推送最更新的視覺化圖表。
