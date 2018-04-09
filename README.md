@@ -30,3 +30,11 @@ scaledUI透過Redis的擴展讓我們擁有可以根據負載來scale-out後台�
 我們透過了Redis的幫助，讓我們有機會平行擴展web服務的instances來服務更多使用者連線。然而每一個新加入的web服務都可能是不同ip或port，對於使用者而言要求連線到不同的ip與port來存取服務是很不方便也不親民。本專案將在`03_ScaledUI`為基礎下進行專業結構的調整以及使用Nginx來配置reverse-proxy來解決問題。
 
 ![04_architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/04_ScaledUI/architecture.png)
+
+
+### 05_ChartedUI 即時的視覺化圖表的產出與推送
+
+有一個快速處理資料計算後台與即時將有效資訊送達前後的資料頻道對於讓資料展現價值很重要，但是如果發揮資料的方式是要透過人來解讀與應用的話。資料/資訊的展示力就至關重要。
+資料的可視化或視覺化一向是展示一家公司對於資訊應用的最佳進入點，因此選擇一個能夠充份表現資料的圖表元件並整合到資料處理的流程中就是`05_ChartedUI`。
+
+![05_architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/05_ChartedUI/architecture.png)

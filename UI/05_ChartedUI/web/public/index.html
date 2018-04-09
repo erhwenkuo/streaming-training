@@ -1,0 +1,337 @@
+<!doctype html>
+<html ng-app="myApp">
+    <head>
+        <title>05_ChartedUI</title>
+        <link rel="stylesheet" href="assets/css/sketch/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+        <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
+        <style type="text/css">            
+            .ace_editor { height: 400px; }
+        </style>
+    </head>
+    <body ng-controller="myCtrl">
+        <br/>
+        <div class="container">
+            <!-- 連接到的App的instance -->
+            <button type="button" class="btn btn-primary">
+                <i class="fas fa-server"></i> AppID: <span class="badge badge-success"><span ng-bind="appProfile.id"/></span>
+            </button>                 
+            <!-- 即時展現由Server告知的線上連線數 -->
+            <button type="button" class="btn btn-primary">
+                <i class="fas fa-users"></i> Online <span class="badge badge-pill badge-success"><span ng-bind="onelineCounter"/></span>
+            </button>  
+            
+            <!-- 展現與socket.io的連線狀態 -->
+            <div>
+                <span ng-show="socketConnected" style="color:green"><i class="far fa-check-circle" ></i> Connected</span>
+                <span ng-show="!socketConnected" style="color:red"><i class="fas fa-exclamation-triangle"></i></i> Not connect</span>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <!-- Client往Server的訊息  -->
+                <div class="col" id="clientToServer">
+                    <form>
+                        <fieldset>
+                            <legend>Client to Server</legend>
+                            <label>Chart Types</label>                            
+                            <div class="form-group">
+                                <select class="custom-select" ng-change="getChartOption()" ng-model="chartName" ng-options="chartType.name group by chartType.category for chartType in chartTypes">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="chartDataClientToServer">Chartdata to publish</label>
+                                <div id="chartDataClientToServer" ui-ace="{
+                                    useWrapMode : true,
+                                    theme:'textmate',
+                                    mode: 'javascript',
+                                    onLoad: aceLoaded,
+                                    onChange: aceChanged
+                                  }" ng-model="aceModel"></div>
+                                
+                            </div>                    
+                            <button type="submit" class="btn btn-primary">Send to Server</button>
+                        </fieldset>
+                    </form>
+                </div>
+                
+                <!-- Server往Client的訊息  -->
+                <div class="col" id="serverToClient">
+                    <legend>Server to Client</legend> 
+                    <div class="form-group">
+                        <label for="exampleTextarea">Chartdata received</label>
+                        <!-- 为 ECharts 準備一個給定大小(寬高)的DOM -->
+                        <div id="chart" style="width: 600px;height:550px;"></div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            
+        </div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="assets/js/jquery-3.3.1.min.js"></script>
+        <script src="assets/js/bootstrap.bundle.min.js"></script>
+        <script src="assets/js/src-noconflict/ace.js"></script>
+        <script src="assets/js/angular.min.js"></script>
+        <script src="assets/js/ui-ace.min.js"></script> <!-- 引入 AngularJS ui-ace 的Directive -->
+        <script src="assets/js/echarts.min.js"></script> <!-- 引入 ECharts 文件 -->
+        <script src="assets/js/ecStat.min.js"></script> <!-- 引入 ECharts 統計擴充模組 -->
+        <script src="assets/js/dataTool.min.js"></script> <!-- 引入 ECharts 擴充模組 -->
+        <script src="assets/map/js/china.js"></script><!-- 引入 ECharts china地圖模組 -->
+        <script src="assets/map/js/world.js"></script><!-- 引入 ECharts world地圖模組 -->
+        <script>
+            var app = angular.module('myApp', ['ui.ace']);
+    
+            app.controller('myCtrl', function($scope, $http) {
+                $scope.socketConnected = false; // 是否連接上socket.io的服務
+                $scope.appProfile = 'N/A';
+                $scope.onelineCounter = 'N/A';
+
+                $scope.chartTypes = [
+                    {name:'line-simple', category:'Line'},
+                    {name:'area-basic', category:'Line'},
+                    {name:'line-smooth', category:'Line'},
+                    {name:'area-stack', category:'Line'},
+                    {name:'line-stack', category:'Line'},
+                    {name:'area-rainfall', category:'Line'},
+                    {name:'area-simple', category:'Line'},
+                    {name:'confidence-band', category:'Line'},
+                    {name:'grid-multiple', category:'Line'},
+                    {name:'line-aqi', category:'Line'},
+                    {name:'line-marker', category:'Line'},
+                    {name:'line-sections', category:'Line'},
+                    {name:'line-step', category:'Line'},
+                    {name:'line-style', category:'Line'},
+                    {name:'line-tooltip-touch', category:'Line'},
+                    {name:'line-y-category', category:'Line'},
+                    {name:'multiple-x-axis', category:'Line'},
+                    {name:'bar-animation-delay', category:'Bar'},
+                    {name:'bar-brush', category:'Bar'},
+                    {name:'bar-gradient', category:'Bar'},
+                    {name:'bar-label-rotation', category:'Bar'},
+                    {name:'bar-negative', category:'Bar'},
+                    {name:'bar-negative2', category:'Bar'},
+                    {name:'bar-polar-real-estate', category:'Bar'},
+                    {name:'bar-polar-stack', category:'Bar'},
+                    {name:'bar-polar-stack-radial', category:'Bar'},
+                    {name:'bar-rich-text', category:'Bar'},
+                    {name:'bar-simple', category:'Bar'},
+                    {name:'bar-stack', category:'Bar'},
+                    {name:'bar-tick-align', category:'Bar'},
+                    {name:'bar-waterfall', category:'Bar'},
+                    {name:'bar-waterfall2', category:'Bar'},
+                    {name:'bar-y-category', category:'Bar'},
+                    {name:'bar-y-category-stack', category:'Bar'},
+                    {name:'bar1', category:'Bar'},
+                    {name:'mix-line-bar', category:'Bar'},
+                    {name:'mix-timeline-finance', category:'Bar'},
+                    {name:'mix-zoom-on-value', category:'Bar'},
+                    {name:'multiple-y-axis', category:'Bar'},
+                    {name:'watermark', category:'Bar'},
+                    {name:'pie-custom', category:'Pie'},
+                    {name:'pie-doughnut', category:'Pie'},
+                    {name:'pie-legend', category:'Pie'},
+                    {name:'pie-nest', category:'Pie'},
+                    {name:'pie-pattern', category:'Pie'},
+                    {name:'pie-rich-text', category:'Pie'},
+                    {name:'pie-roseType', category:'Pie'},
+                    {name:'pie-simple', category:'Pie'},
+                    {name:'scatter-simple', category:'Scatter'},
+                    {name:'bubble-gradient', category:'Scatter'},
+                    {name:'effectScatter-map', category:'Scatter'},
+                    {name:'scatter-anscombe-quartet', category:'Scatter'},
+                    {name:'scatter-aqi-color', category:'Scatter'},
+                    {name:'scatter-clustering-process', category:'Scatter'},
+                    {name:'scatter-effect', category:'Scatter'},
+                    {name:'scatter-exponential-regression', category:'Scatter'},
+                    {name:'scatter-large', category:'Scatter'},
+                    {name:'scatter-life-expectancy-timeline', category:'Scatter'},
+                    {name:'scatter-linear-regression', category:'Scatter'},
+                    {name:'scatter-logarithmic-regression', category:'Scatter'},
+                    {name:'scatter-map', category:'Scatter'},
+                    {name:'scatter-map-brush', category:'Scatter'},
+                    {name:'scatter-nutrients', category:'Scatter'},
+                    {name:'scatter-painter-choice', category:'Scatter'},
+                    {name:'scatter-polar-punchCard', category:'Scatter'},
+                    {name:'scatter-polynomial-regression', category:'Scatter'},
+                    {name:'scatter-punchCard', category:'Scatter'},
+                    {name:'scatter-single-axis', category:'Scatter'},
+                    {name:'scatter-stream-visual', category:'Scatter'},
+                    {name:'scatter-weibo', category:'Scatter'},
+                    {name:'scatter-weight', category:'Scatter'},
+                    {name:'scatter-world-population', category:'Scatter'},
+                    {name:'geo-lines', category:'Map'},
+                    {name:'geo-map-scatter', category:'Map'},
+                    {name:'lines-airline', category:'Map'},                     
+                    {name:'map-china', category:'Map'},   
+                    {name:'map-china-dataRange', category:'Map'},   
+                    {name:'map-usa', category:'Map'},   
+                    {name:'candlestick-sh', category:'Candlestick'},
+                    {name:'candlestick-simple', category:'Candlestick'},
+                    {name:'candlestick-touch', category:'Candlestick'},
+                    {name:'radar', category:'Radar'},
+                    {name:'radar-aqi', category:'Radar'},   
+                    {name:'radar-custom', category:'Radar'},   
+                    {name:'radar-multiple', category:'Radar'},
+                    {name:'radar2', category:'Radar'},   
+                    {name:'boxplot-light-velocity', category:'Boxplot'},
+                    {name:'boxplot-light-velocity2', category:'Boxplot'},   
+                    {name:'boxplot-multi', category:'Boxplot'},
+                    {name:'heatmap-cartesian', category:'Heatmap'}, 
+                    {name:'heatmap-large', category:'Heatmap'}, 
+                    {name:'heatmap-large-piecewise', category:'Heatmap'}, 
+                    {name:'heatmap-map', category:'Heatmap'}, 
+                    {name:'calendar-graph', category:'Graph'}, 
+                    {name:'graph', category:'Graph'}, 
+                    {name:'graph-circular-layout', category:'Graph'}, 
+                    {name:'graph-force', category:'Graph'}, 
+                    {name:'graph-force-dynamic', category:'Graph'}, 
+                    {name:'graph-force2', category:'Graph'}, 
+                    {name:'graph-grid', category:'Graph'}, 
+                    {name:'graph-life-expectancy', category:'Graph'}, 
+                    {name:'graph-npm', category:'Graph'}, 
+                    {name:'graph-simple', category:'Graph'}, 
+                    {name:'graph-webkit-dep', category:'Graph'}, 
+                    {name:'tree-basic', category:'Tree'}, 
+                    {name:'tree-legend', category:'Tree'}, 
+                    {name:'tree-radial', category:'Tree'}, 
+                    {name:'tree-vertical', category:'Tree'},
+                    {name:'treemap-disk', category:'Treemap'}, 
+                    {name:'treemap-drill-down', category:'Treemap'}, 
+                    {name:'treemap-obama', category:'Treemap'}, 
+                    {name:'treemap-show-parent', category:'Treemap'}, 
+                    {name:'treemap-simple', category:'Treemap'}, 
+                    {name:'treemap-visual', category:'Treemap'}, 
+                    {name:'sunburst-book', category:'Sunburst'}, 
+                    {name:'sunburst-drink', category:'Sunburst'}, 
+                    {name:'sunburst-label-rotate', category:'Sunburst'}, 
+                    {name:'sunburst-monochrome', category:'Sunburst'}, 
+                    {name:'sunburst-simple', category:'Sunburst'}, 
+                    {name:'sunburst-visualMap', category:'Sunburst'}, 
+                    {name:'map-parallel-prices', category:'Parallel'}, 
+                    {name:'parallel-aqi', category:'Parallel'}, 
+                    {name:'parallel-nutrients', category:'Parallel'}, 
+                    {name:'parallel-simple', category:'Parallel'}, 
+                    {name:'scatter-matrix', category:'Parallel'}, 
+                    {name:'sankey-energy', category:'Sankey'}, 
+                    {name:'sankey-product', category:'Sankey'}, 
+                    {name:'sankey-simple', category:'Sankey'}, 
+                    {name:'funnel', category:'Funnel'}, 
+                    {name:'funnel-align', category:'Funnel'}, 
+                    {name:'funnel-customize', category:'Funnel'}, 
+                    {name:'funnel-mutiple', category:'Funnel'}, 
+                    {name:'gauge', category:'Gauge'}, 
+                    {name:'gauge-car', category:'Gauge'}, 
+                    {name:'gauge-car-dark', category:'Gauge'}, 
+                    {name:'pictorialBar-body-fill', category:'Pictorialbar'}, 
+                    {name:'pictorialBar-dotted', category:'Pictorialbar'}, 
+                    {name:'pictorialBar-forest', category:'Pictorialbar'}, 
+                    {name:'pictorialBar-hill', category:'Pictorialbar'}, 
+                    {name:'pictorialBar-spirit', category:'Pictorialbar'}, 
+                    {name:'pictorialBar-vehicle', category:'Pictorialbar'}, 
+                    {name:'pictorialBar-velocity', category:'Pictorialbar'}, 
+                    {name:'themeRiver-basic', category:'Themeriver'}, 
+                    {name:'themeRiver-lastfm', category:'Themeriver'}, 
+                    {name:'calendar-charts', category:'Calendar'}, 
+                    {name:'calendar-effectscatter', category:'Calendar'}, 
+                    {name:'calendar-horizontal', category:'Calendar'}, 
+                    {name:'calendar-lunar', category:'Calendar'}, 
+                    {name:'calendar-pie', category:'Calendar'}, 
+                    {name:'calendar-vertical', category:'Calendar'}, 
+                    {name:'bus-animation', category:'Gallery'}, 
+                    {name:'circle-hospital', category:'Gallery'}, 
+                    {name:'custom-hexbin', category:'Gallery'}, 
+                ];
+
+                $scope.aceModel = "";
+                
+                $scope.chartName = "";
+
+                // 取得圖表相關的設定與範例資料
+                $scope.getChartOption = function(){
+                    if($scope.chartName && $scope.chartName!==""){
+                        name = $scope.chartName.name;
+                        catg = $scope.chartName.category.toLowerCase();
+
+                        $http.get("assets/chartdata/"+catg+"/"+name+".js")
+                        .then(function(response) {
+                            $scope.aceModel = response.data;
+                        });
+                    }                    
+                };
+
+                // 透過socket.io連接到server來建立雙向溝通的頻道
+                var socket = io();
+    
+                // 將"圖表"所需要的訊息送給server
+                $('form').submit(function(){
+                    //console.log($scope.aceModel);
+                    socket.emit('c_chartOption', $scope.chartName, $scope.aceModel);
+                    return false;
+                });
+
+                // 收到由某一個server所廣播出來的"圖表"訊息
+                socket.on('s_chartOption', function(chartName, chartOption){
+                    // 更新UI上的訊息
+                    $scope.chartName = chartName;
+                    $scope.aceModel = chartOption;
+                    $scope.$apply();
+
+                    option = {};
+                    // 基於準備好的DOM來初始化echarts實例
+                    var myChart = echarts.init(document.getElementById('chart'));
+                    
+                    // 將chartOption以Javascript來執行
+                    eval(chartOption);
+                    //var chartOption = eval(chartOption);
+                    //setChartOption('chart',chartOption);
+
+                    // 使用指定的配置和數據來顯示圖表
+                    myChart.setOption(option, true);
+                });
+
+                // 收到由server送來的app_profile訊息
+                socket.on('s_app_profile', function(appProfile){
+                    $scope.appProfile = appProfile;
+                    $scope.$apply();
+                });
+
+                // 收到由server送來的"現在連線數"訊息
+                socket.on('s_oneline_count', function(counter){
+                    $scope.onelineCounter = counter;
+                    $scope.$apply();
+                });
+
+                // 監聽socket.io的client的 "連線 connect" 事件
+                socket.on('connect', function(){
+                    // 連線成功
+                    $scope.socketConnected = true;
+                    $scope.$apply();
+                });
+                
+                // 監聽socket.io的client的 "連線錯誤 connect_error" 事件
+                socket.on('connect_error', function(error){
+                    // 連線失敗 - 重置相關的變數
+                    $scope.socketConnected = false;
+                    $scope.appProfile = 'N/A';
+                    $scope.onelineCounter = 'N/A';
+                    $scope.serverClock = 'N/A'; //epoch
+                    $scope.$apply();
+                });
+    
+            });
+            
+            // 準備好的DOM來展示一個echarts實例
+            function setChartOption(chartDOM, chartOpts){
+                // 基於準備好的DOM來初始化echarts實例
+                var chart = echarts.init(document.getElementById(chartDOM));
+                // 使用指定的配置和數據來顯示圖表
+                chart.setOption(chartOpts, true);
+            }
+        </script>  
+
+    </body>
+</html>

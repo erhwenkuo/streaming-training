@@ -1,0 +1,12 @@
+config:
+  target: "http://localhost:3001"
+  phases:
+    - duration: 1200 # 持續1200秒
+      arrivalRate: 5 # 每秒產生5個socket連線
+  socketio:
+    transports: ["websocket"]
+
+scenarios:
+  - engine: "socketio"
+    flow:
+      - think: 1200 # 每個連線連接完成後不作什麼事，但是1200秒就斷開連接
