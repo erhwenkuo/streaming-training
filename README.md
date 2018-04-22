@@ -39,7 +39,7 @@ scaledUI透過Redis的擴展讓我們擁有可以根據負載來scale-out後台�
 
 ![05_architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/05_ChartedUI/architecture.png)
 
-# 06 KafkaLinkeddUI
+### 06_KafkaLinkeddUI
 
 Apache Kafka 是開放原始碼的分散式訊息發佈與訂閱(Pub/Sub)系統， 它是現在許多串流資料的即時應用程式的核心骨幹。您可以將網站點擊流、金融交易和應用程式日誌之類的串流資料傳送到 Kafka 叢集，它會緩衝資料並將資料提供給建置在 Apache Spark Streaming、Apache Storm、Apache Samza 或 Kafka Streaming/KSQL等框架上的串流處理應用程式。
 
