@@ -110,5 +110,5 @@ npm install
 
 - 由於每一個RPC的方法回傳的時間不一樣, 測試時可以同時送出不同種類的RPC的呼叫, 然後觀察從UI收到RPC response的順序
 
-![ui_demo](https://github.com/erhwenkuo/streaming-training/blob/master/UI/06_KafkaLinkedUI/architecture.png)
+![ui_demo](https://github.com/erhwenkuo/streaming-training/blob/master/UI/06_KafkaLinkedUI/ui_demo.png)
 
