@@ -1,0 +1,215 @@
+<!doctype html>
+<html ng-app="myApp">
+    <head>
+        <title>06_KafkaLinkedUI</title>
+        <link rel="stylesheet" href="assets/css/sketch/bootstrap.min.css">
+        <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+        <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
+    </head>
+    <body ng-controller="myCtrl">
+        <br/>
+        <div class="container">
+            <!-- 連接到的App的instance -->
+            <button type="button" class="btn btn-primary">
+                <i class="fas fa-server"></i> AppID: <span class="badge badge-success"><span ng-bind="appProfile.id"/></span>
+            </button>      
+                            
+            <!-- 即時展現由Server告知的線上連線數 -->
+            <button type="button" class="btn btn-primary">
+                <i class="fas fa-users"></i> Online <span class="badge badge-pill badge-success"><span ng-bind="onelineCounter"/></span>
+            </button>  
+            
+            <!-- 展現與socket.io的連線狀態 -->
+            <div>
+                <span ng-show="socketConnected" style="color:green"><i class="far fa-check-circle" ></i> Connected</span>
+                <span ng-show="!socketConnected" style="color:red"><i class="fas fa-exclamation-triangle"></i></i> Not connect</span>
+            </div>
+        </div>
+        <div class="container">
+            <div class="row">
+                <!-- Client往Server的訊息  -->
+                <div class="col" id="clientToServer">
+                    <form>
+                        <fieldset>
+                            <legend>Client to Server</legend>
+
+                            <label>RPC Names:</label>                            
+                            <div class="form-group">
+                                <select class="custom-select" ng-model="rpcName" ng-options="rpcName for rpcName in rpcNames">
+                                </select>
+                                <div class="form-group">
+                                    <label for="num1">Num1</label>
+                                    <input type="number" class="form-control" id="rpcNum1" placeholder="num1" ng-model="rpcParams.num1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="num2">Num2</label>
+                                    <input type="number" class="form-control" id="rpcNum2" placeholder="num2" ng-model="rpcParams.num2">
+                                </div>
+                            </div>    
+                            <button type="submit" class="btn btn-primary">Send to Server</button>
+                        </fieldset>
+                    </form>
+                </div>
+                
+                <!-- Server往Client的訊息  -->
+                <div class="col" id="serverToClient">
+                    <legend>Server to Client</legend>
+                    <ul class="list-group" ng-show="rpcRequests_resolved.length > 0">                        
+                        <li class="list-group-item d-flex justify-content-between align-items-center" ng-repeat="res in rpcRequests_resolved">
+                                {{res.rpcName}}( {{res.rpcParams.num1}}, {{res.rpcParams.num2}} ) = {{res.rpcResult.result}}
+                            <span class="badge badge-primary badge-pill">Rpc : {{res.id}}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- 用來展現己送出的RPC Request-->
+            <div class="row">
+                <legend>RPC Request</legend>
+                <div class="container">
+                    <span class="badge badge-pill badge-info" ng-repeat="req in rpcRequests_inflight"> Rpc : {{req.id}} </span>
+                </div>
+            </div>
+            <!-- 用來展現己收到的RPC Response-->
+            <div class="row">
+                    <legend>RPC Response</legend>
+                <div class="container">
+                        <span class="badge badge-pill badge-success" ng-repeat="res in rpcRequests_resolved"> Rpc : {{res.id}} </span>
+                </div>
+            </div>
+        </div>
+    
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="assets/js/jquery-3.3.1.min.js"></script>
+        <script src="assets/js/bootstrap.bundle.min.js"></script>
+        <script src="assets/js/angular.min.js"></script>
+        <script>
+            var app = angular.module('myApp', []);
+    
+            app.controller('myCtrl', function($scope) {
+                $scope.socketConnected = false; // 是否連接上socket.io的服務
+                $scope.appProfile = 'N/A';
+                $scope.onelineCounter = 'N/A';
+
+                $scope.rpcNames = ["ADD","SUBTRACT", "MULTIPLY", "DIVIDE"];
+                $scope.rpcName = "ADD"; // 預設
+                $scope.rpcParams = {num1:0, num2:0};
+                
+                $scope.rpcRequestIdCounter = 0;
+                
+                // 保留一個記錄送了那些Request到後台
+                $scope.rpcRequests_inflight = [];
+                
+                // 保留一個記錄那些Request己經從後台回來了
+                $scope.rpcRequests_resolved = [];
+                
+                // 透過socket.io連接到server來建立雙向溝通的頻道
+                var socket = io();
+    
+                $('form').submit(function(){
+                    var textMessage = $('#msgClientToServer').val();
+
+                    // 構建一個Request物件
+                    var reqId =  $scope.rpcRequestIdCounter++;
+                    
+                    var request = {
+                        id: reqId,
+                        rpcName: $scope.rpcName,
+                        rpcParams: $scope.rpcParams
+                    };
+
+                    // 保留Rpc的Request物件
+                    $scope.rpcRequests_inflight.push(request);
+                    $scope.$apply();
+
+                    // 將request訊息送給server
+                    socket.emit('c_request', request);
+                    
+                    return false;
+                });
+
+                // 收到由server送來的app_profile訊息
+                socket.on('s_app_profile', function(appProfile){
+                    $scope.appProfile = appProfile;
+                    $scope.$apply();
+                });
+
+                // 收到由server送來的"現在連線數"訊息
+                socket.on('s_oneline_count', function(counter){
+                    $scope.onelineCounter = counter;
+                    $scope.$apply();
+                });
+                
+                // 收到由Server回送的訊息
+                socket.on('s_response', function(response){
+                    console.log(response);
+                    // 收到Rpc的Result
+                    /*
+                        {
+                            appId: 0,
+                            socketId: 'm8rJT2bqKnUQfafNAAAF',
+                            rpcName: 'ADD',
+                            rpcParams: { num1: 1, num2: 1 },
+                            status: 200,
+                            rpcResult: { result: 2 } 
+                        }
+                    */
+                    $('#msgServerToClient').text(JSON.stringify(response));
+
+                    // 把Rpc的Request移除
+                    var item_idx = null;
+                    for (var i=0; i<$scope.rpcRequests_inflight.length; i++){
+                        if ($scope.rpcRequests_inflight[i].id == response.id){
+                            item_idx = i;
+                            break;
+                        }
+                    }
+
+                    if(item_idx!=null){
+                        $scope.rpcRequests_inflight.splice(item_idx, 1); //移除
+                        // 為response留一個時間以便之後移除
+                        response.timestamp = Date.now();
+                        $scope.rpcRequests_resolved.push(response); //增加
+                        $scope.$apply();
+                    }
+                });
+
+                // 監聽socket.io的client的相關事件
+                socket.on('connect', function(){
+                    // 連線成功
+                    $scope.socketConnected = true;
+                    $scope.$apply();
+                });
+
+                socket.on('connect_error', function(error){
+                    // 連線失敗 - 重置相關的變數
+                    $scope.socketConnected = false;
+                    $scope.appProfile = 'N/A';
+                    $scope.onelineCounter = 'N/A';
+                    $scope.serverClock = 'N/A'; //epoch
+                    $scope.$apply();
+                });
+                
+                // 定期把完成超過10秒的RPC記錄移除
+                setInterval(()=>{                    
+                    // 把Rpc的Response移除
+                    var item_idx = null;
+                    var now = Date.now();
+                    for (var i=0; i<$scope.rpcRequests_resolved.length; i++){
+                        // 超過10秒就移除
+                        if (now - $scope.rpcRequests_resolved[i].timestamp > 10000){
+                            item_idx = i;
+                            break;
+                        }
+                    }
+
+                    if(item_idx!=null){
+                        $scope.rpcRequests_resolved.splice(item_idx, 1); //移除
+                        $scope.$apply();
+                    }
+                },1000);
+    
+            });
+        </script>  
+
+    </body>
+</html>

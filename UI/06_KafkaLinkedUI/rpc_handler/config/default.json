@@ -1,0 +1,11 @@
+{
+    "app":{
+        "name": "06_RpcHandler",
+        "log_level": "info"
+    },
+    "kafka":{
+        "host":"localhost:9092",
+        "request_topic":"socket-request",
+        "response_topic":"socket-response"
+    }
+}

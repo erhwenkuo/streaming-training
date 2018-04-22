@@ -1,0 +1,22 @@
+{
+    "app":{
+        "name": "06_KafkaLinkedUI",
+        "id": 0,
+        "http":{
+            "port": 3000
+        },
+        "log_level": "info",
+        "socket_io":{
+            "scaled_with_redis": false
+        }
+    },
+    "redis":{
+        "host": "localhost",
+        "port": 6379
+    },
+    "kafka":{
+        "host":"localhost:9092",
+        "request_topic":"socket-request",
+        "response_topic":"socket-response"
+    }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "06_kafkalinkedui",
+  "version": "1.0.0",
+  "description": "A UI with echart for streaming training",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Erhwen,Kuo",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "clear": "^0.1.0",
+    "config": "^1.30.0",
+    "express": "^4.16.3",
+    "kafka-node": "^2.5.0",
+    "morgan": "^1.9.0",
+    "socket.io": "^2.1.0",
+    "socket.io-redis": "^5.2.0",
+    "winston": "^2.4.1"
+  }
+}

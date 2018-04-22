@@ -38,3 +38,11 @@ scaledUI透過Redis的擴展讓我們擁有可以根據負載來scale-out後台�
 資料的可視化或視覺化一向是展示一家公司對於資訊應用的最佳進入點，因此選擇一個能夠充份表現資料的圖表元件並整合到資料處理的流程中就是`05_ChartedUI`。
 
 ![05_architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/05_ChartedUI/architecture.png)
+
+# 06 KafkaLinkeddUI
+
+Apache Kafka 是開放原始碼的分散式訊息發佈與訂閱(Pub/Sub)系統， 它是現在許多串流資料的即時應用程式的核心骨幹。您可以將網站點擊流、金融交易和應用程式日誌之類的串流資料傳送到 Kafka 叢集，它會緩衝資料並將資料提供給建置在 Apache Spark Streaming、Apache Storm、Apache Samza 或 Kafka Streaming/KSQL等框架上的串流處理應用程式。
+
+這個專案的建置主要是想透過Socket.io來串連Kafka來展示一個非同步的RPC呼叫以及即時的RPC結果回傳至前端UI的基本概念與架構。
+
+![architecture](https://github.com/erhwenkuo/streaming-training/blob/master/UI/06_KafkaLinkedUI/architecture.png)
