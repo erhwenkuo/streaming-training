@@ -23,22 +23,22 @@ tar -xzvf confluent-oss-4.1.0-2.11.tar.gz
 ```
 
 - 啟動Kafak
-  - 以下用<CONFLUENT_HOME>代表Confluent解壓縮的根目錄
+  - 以下用<CONFLUENT_HOME>代表Confluent解壓縮的根目錄
 ```
-$<CONFLUENT_HOME>/bin/confluent start kafka
+$<CONFLUENT_HOME>/bin/confluent start kafka
 ```
 
 
-以上的指令會啟動兩個服務: zookeeper & kafka
+以上的指令會啟動兩個服務: zookeeper & kafka
 ```
-Using CONFLUENT_CURRENT: /tmp/confluent.YQrxQOOe
+Using CONFLUENT_CURRENT: /tmp/confluent.YQrxQOOe
 Starting zookeeper
 zookeeper is [UP]
 Starting kafka
 kafka is [UP]
 ```
 
-- 建立兩個在範例裡會用到的topic
+- 建立兩個在範例裡會用到的topic
   - socket-request
   - socket-response
 
@@ -49,7 +49,7 @@ $ <CONFLUENT_HOME>/bin/kafka-topics --create --zookeeper localhost:2181 \
 $ <CONFLUENT_HOME>/bin/kafka-topics --create --zookeeper localhost:2181 \
   --replication-factor 1 --partitions 1 --topic socket-response
 ```
-- 檢查topic創建成功
+- 檢查topic創建成功
 ```
 $ <CONFLUENT_HOME>/bin/kafka-topics --list --zookeeper localhost:2181
 ```
@@ -66,7 +66,7 @@ socket-response
   - rpc_handler/app.js
 
 ## 安裝WebUI
-  - 下載本專案之後, 切換到`06_KafkaLinkedUI/web`的目錄
+  - 下載本專案之後, 切換到`06_KafkaLinkedUI/web`的目錄
   - 執行`npm install`來下載相關的Node.js的packages
 ```
 cd 06_KafkaLinkedUI/web
@@ -74,8 +74,8 @@ cd 06_KafkaLinkedUI/web
 npm install
 ```
   - 修改 `web/config/default.json`的設定檔:
-    - app.id (int) 代表一個application的instance編號, 例如: 0, 1, 2...
-    - app.http.port (int) 代表要使用那一個http的port來提供服務, 例如: 3000, 3001, 3002...
+    - app.id (int) 代表一個application的instance編號, 例如: 0, 1, 2...
+    - app.http.port (int) 代表要使用那一個http的port來提供服務, 例如: 3000, 3001, 3002...
 
   - 啟動WebUI
     - 啟動app.js的一個instance
@@ -86,7 +86,7 @@ cd 06_KafkaLinkedUI/web
 node app.js
 ```
 ## 安裝Rpc_Handler
- - 下載本專案之後, 切換到`06_KafkaLinkedUI/rpc_handler`的目錄
+ - 下載本專案之後, 切換到`06_KafkaLinkedUI/rpc_handler`的目錄
   - 執行`npm install`來下載相關的Node.js的packages
 ```
 cd 06_KafkaLinkedUI/rpc_handler
@@ -96,19 +96,19 @@ npm install
 
 ## 驗證
 
-- 多個瀏覽器連接
-  - http://localhost:3000
+- 多個瀏覽器連接
+  - http://localhost:3000
 
 - 透過下拉選單選擇想要送出的RPC
-  - ADD (要1秒才會完成)
-  - SUBSTRACT (要3秒才會完成)
-  - MULTIPLY (要6秒才會完成)
-  - DIVIDE (要12秒才會完成)
-- 填入NUM1與NUM2的數值
+  - ADD (要1秒才會完成)
+  - SUBSTRACT (要3秒才會完成)
+  - MULTIPLY (要6秒才會完成)
+  - DIVIDE (要12秒才會完成)
+- 填入NUM1與NUM2的數值
 
 - 點選"Send to Server"
 
-- 由於每一個RPC的方法回傳的時間不一樣, 測試時可以同時送出不同種類的RPC的呼叫, 然後觀察從UI收到RPC response的順序
+- 由於每一個RPC的方法回傳的時間不一樣, 測試時可以同時送出不同種類的RPC的呼叫, 然後觀察從UI收到RPC response的順序
 
 ![ui_demo](https://github.com/erhwenkuo/streaming-training/blob/master/UI/06_KafkaLinkedUI/architecture.png)
 
